@@ -1,0 +1,23 @@
+# Visual Studio/Rider specific
+.vs/
+*.suo
+*.user
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Rider specific
+.idea/
+
+# Mac/Linux specific
+.DS_Store
+*.AppleDouble
+
+# Local config files
+appsettings.Development.json
+
+# Secrets
+secrets.json
+user-secrets.json
