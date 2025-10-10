@@ -21,3 +21,4 @@ appsettings.Development.json
 # Secrets
 secrets.json
 user-secrets.json
+appsettings.Local.json
