@@ -19,18 +19,19 @@
 *   **Паттерны:** Repository, Factory
 *   **Архитектура:** Разделение на UI-слой (`TaskManager`) и ядро (`TaskManager.Core`).
 
-#### Быстрый старт
+### Быстрый старт
 
 1.  **База данных:** Создайте базу данных `TaskManagerDB` и таблицу `Tasks` с помощью скрипта `DatabaseScripts/Setup_TaskManagerDB.sql`.
 
 2.  **Строка подключения:** В проекте `TaskManager` создайте файл `appsettings.Local.json` и укажите в нем вашу строку подключения к `TaskManagerDB`.
     *Пример:*
     ```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=YOUR_SERVER_NAME;Database=TaskManagerDB;Trusted_Connection=True;"
-  }
-}
+    {
+      "ConnectionStrings": {
+        "DefaultConnection": "Server=YOUR_SERVER_NAME;Database=TaskManagerDB;Trusted_Connection=True;TrustServerCertificate=True;"
+      }
+    }
     ```
+    Замените `YOUR_SERVER_NAME` на имя вашего экземпляра SQL Server (например, `.` или `.\SQLEXPRESS`).
 
 3.  **Запуск:** Откройте `TaskManager.sln` и запустите проект `TaskManager`.
