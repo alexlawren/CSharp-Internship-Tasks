@@ -1,10 +1,7 @@
-﻿using Library.API.Models;
-using Library.API.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Library.Application.Interfaces;
+using Library.Domain.Models;
 
-namespace Library.API.Services
+namespace Library.Application.Services
 {
     public class BookService : IBookService
     {

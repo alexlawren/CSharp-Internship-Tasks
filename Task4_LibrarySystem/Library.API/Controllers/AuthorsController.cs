@@ -1,7 +1,6 @@
-﻿using Library.API.DTOs;
-using Library.API.Models;
-using Library.API.Repositories;
-using Library.API.Services;
+﻿using Library.Application.DTOs;
+using Library.Application.Services;
+using Library.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,7 +44,7 @@ namespace Library.API.Controllers
         {
             var authorModel = new Author
             {
-                Name = authorDto.Name,
+                Name = authorDto.Name?.Trim() ?? string.Empty,
                 DateOfBirth = authorDto.DateOfBirth.Value
             };
 
@@ -62,7 +61,7 @@ namespace Library.API.Controllers
             var authorModel = new Author
             {
                 Id = id,
-                Name = authorDto.Name,
+                Name = authorDto.Name?.Trim() ?? string.Empty,
                 DateOfBirth = authorDto.DateOfBirth.Value
             };
 

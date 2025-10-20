@@ -1,8 +1,6 @@
-﻿using Library.API.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Library.Domain.Models;
 
-namespace Library.API.Repositories
+namespace Library.Application.Interfaces
 {
     public interface IBookRepository
     {

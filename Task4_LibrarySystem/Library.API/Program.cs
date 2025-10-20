@@ -2,9 +2,10 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Library.API.JsonConverters;
 using Library.API.Middleware;
-using Library.API.Repositories;
-using Library.API.Services;
-using Library.API.Validators;
+using Library.Application.Interfaces;
+using Library.Application.Services;
+using Library.Application.Validators;
+using Library.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

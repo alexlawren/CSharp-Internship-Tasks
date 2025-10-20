@@ -1,6 +1,6 @@
-﻿using Library.API.Models;
+﻿using Library.Domain.Models;
 
-namespace Library.API.Data
+namespace Library.Infrastructure.Data
 {
     public static class MemoryStorage
     {

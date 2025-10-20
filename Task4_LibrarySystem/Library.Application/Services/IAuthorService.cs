@@ -1,6 +1,6 @@
-﻿using Library.API.Models;
+﻿using Library.Domain.Models;
 
-namespace Library.API.Services
+namespace Library.Application.Services
 {
     public interface IAuthorService
     {

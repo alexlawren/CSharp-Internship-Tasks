@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
-using Library.API.DTOs;
+using Library.Application.DTOs;
 
-namespace Library.API.Validators
+namespace Library.Application.Validators
 {
-    public class UpdateBookDtoValidator : AbstractValidator<UpdateBookDto>
+    public class CreateBookDtoValidator : AbstractValidator<CreateBookDto>
     {
-        public UpdateBookDtoValidator()
+        public CreateBookDtoValidator()
         {
             RuleFor(book => book.Title)
                 .NotEmpty().WithMessage("Название книги не может быть пустым")
@@ -20,3 +20,4 @@ namespace Library.API.Validators
         }
     }
 }
+

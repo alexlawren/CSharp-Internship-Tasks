@@ -1,11 +1,9 @@
-﻿using Library.API.DTOs;
-using Library.API.Models;
-using Library.API.Repositories;
-using Library.API.Services;
+﻿using Library.Application.DTOs;
+using Library.Application.Services;
+using Library.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
-using System.Reflection;
 
 namespace Library.API.Controllers
 {
@@ -47,7 +45,7 @@ namespace Library.API.Controllers
         {
             var bookModel = new Book
             {
-                Title = bookDto.Title,
+                Title = bookDto.Title?.Trim() ?? string.Empty,
                 PublishedYear = bookDto.PublishedYear,
                 AuthorId = bookDto.AuthorId,
             };
@@ -58,12 +56,12 @@ namespace Library.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, [FromBody] UpdateBookDto bookDto)
+        public async Task<ActionResult> UpdateBook(int id, [FromBody] UpdateBookDto bookDto)
         {
             var bookModel = new Book
             {
                 Id = id,
-                Title = bookDto.Title,
+                Title = bookDto.Title?.Trim() ?? string.Empty,
                 PublishedYear = bookDto.PublishedYear,
                 AuthorId = bookDto.AuthorId,
             };
@@ -73,7 +71,7 @@ namespace Library.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> DeleteBook(int id)
         {
             await _bookService.DeleteBookAsync(id);
             return NoContent();

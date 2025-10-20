@@ -1,7 +1,7 @@
-﻿using Library.API.Models;
-using Library.API.Repositories;
+﻿using Library.Application.Interfaces;
+using Library.Domain.Models;
 
-namespace Library.API.Services
+namespace Library.Application.Services
 {
     public class AuthorService : IAuthorService
     {

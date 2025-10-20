@@ -1,6 +1,6 @@
-﻿using Library.API.Models;
+﻿using Library.Domain.Models;
 
-namespace Library.API.Repositories
+namespace Library.Application.Interfaces
 {
     public interface IAuthorRepository
     {
