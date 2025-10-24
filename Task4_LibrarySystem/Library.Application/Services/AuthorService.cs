@@ -1,4 +1,5 @@
-﻿using Library.Application.Interfaces;
+﻿using Library.Application.DTOs;
+using Library.Application.Interfaces;
 using Library.Domain.Models;
 
 namespace Library.Application.Services
@@ -14,9 +15,9 @@ namespace Library.Application.Services
             _bookService = bookService;
         }
 
-        public async Task<IEnumerable<Author>> GetAllAuthorsAsync()
+        public async Task<IEnumerable<Author>> GetAllAuthorsAsync(int pageNumber, int pageSize)
         {
-            return await _authorRepository.GetAllAsync();
+            return await _authorRepository.GetAllAsync(pageNumber, pageSize);
         }
 
         public async Task<Author> GetAuthorByIdAsync(int id)
@@ -47,12 +48,29 @@ namespace Library.Application.Services
                 throw new KeyNotFoundException($"Автор с ID = {id} не найден.");
             }
 
-            var books = await _bookService.GetAllBooksAsync();
-            if(books.Any(b => b.AuthorId == id))
+            if (await _bookService.HasBooksAsync(id))
             {
                 throw new InvalidOperationException($"Нельзя удалить автора с ID = {id}, так как у него есть книги.");
             }
+
             await _authorRepository.DeleteAsync(id);
+        }
+
+        public async Task<IEnumerable<Author>> GetAllAuthorsWithBookCountAsync(int pageNumber, int pageSize)
+        {
+            return await _authorRepository.GetAllWithBookCountAsync(pageNumber, pageSize);
+        }
+
+        public async Task<IEnumerable<AuthorDto>> FindAuthorsByNameAsync(string nameQuery)
+        {
+            var author = await _authorRepository.FindAuthorsByNameAsync(nameQuery);
+            return author.Select(a => new AuthorDto
+            {
+                Id = a.Id,
+                Name = a.Name,
+                DateOfBirth = a.DateOfBirth
+            });
+
         }
     }
 }

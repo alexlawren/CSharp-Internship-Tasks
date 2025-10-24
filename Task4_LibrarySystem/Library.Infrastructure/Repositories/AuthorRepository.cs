@@ -1,49 +1,74 @@
 ﻿using Library.Application.Interfaces;
 using Library.Domain.Models;
 using Library.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Library.Infrastructure.Repositories
 {
     public class AuthorRepository : IAuthorRepository
     {
-        public Task<IEnumerable<Author>> GetAllAsync()
+        private readonly LibraryContext _context;
+
+        public AuthorRepository (LibraryContext context)
         {
-            return Task.FromResult<IEnumerable<Author>>(MemoryStorage.Authors.ToList());
+            _context = context;
+        }
+        public async Task<IEnumerable<Author>> GetAllAsync(int pageNumber, int pageSize)
+        {
+            return await _context.Authors
+                .AsNoTracking()
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
-        public Task<Author?> GetByIdAsync(int id)
+        public async Task<Author?> GetByIdAsync(int id)
         {
-            var author = MemoryStorage.Authors.FirstOrDefault(x => x.Id == id);
-            return Task.FromResult(author);
+            return await _context.Authors
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == id);
         }
 
-        public Task<Author?> AddAsync(Author author)
+        public async Task<Author?> AddAsync(Author author)
         {
-            var MaxId = MemoryStorage.Authors.Any() ? MemoryStorage.Authors.Max(b => b.Id) : 0;
-            author.Id = MaxId + 1;
-            MemoryStorage.Authors.Add(author);
-            return Task.FromResult(author);
+            _context.Authors.Add(author);
+            await _context.SaveChangesAsync();
+            return author;
         }
 
-        public Task UpdateAsync(Author author)
+        public async Task UpdateAsync(Author author)
         {
-            var existingAuthor = MemoryStorage.Authors.FirstOrDefault(b => b.Id == author.Id);
-            if (existingAuthor != null)
-            {
-                existingAuthor.Name = author.Name;
-                existingAuthor.DateOfBirth = author.DateOfBirth;
-            }
-            return Task.CompletedTask;
+            await _context.Authors
+                .Where(a => a.Id == author.Id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(a => a.Name, author.Name)
+                    .SetProperty(a => a.DateOfBirth, author.DateOfBirth)
+                    );
         }
 
-        public Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
-            var authorToRemove = MemoryStorage.Authors.FirstOrDefault(b => b.Id == id);
-            if (authorToRemove != null)
-            {
-                MemoryStorage.Authors.Remove(authorToRemove);
-            }
-            return Task.CompletedTask;
+            await _context.Authors
+                .Where (a => a.Id == id)
+                .ExecuteDeleteAsync();
+        }
+
+        public async Task<IEnumerable<Author>> GetAllWithBookCountAsync(int pageNumber, int pageSize)
+        {
+            return await _context.Authors
+                .Include(a => a.Books)
+                .AsNoTracking()
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Author>> FindAuthorsByNameAsync(string nameQuery)
+        {
+            return await _context.Authors
+                .Where(author =>  author.Name.Contains(nameQuery))
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

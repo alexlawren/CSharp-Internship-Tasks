@@ -1,18 +1,21 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Library.API.JsonConverters;
-using Library.API.Middleware;
 using Library.Application.Interfaces;
 using Library.Application.Services;
 using Library.Application.Validators;
+using Library.Infrastructure.Data;
 using Library.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Library.Application.Mappings;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddSingleton<IBookRepository, BookRepository>();
-builder.Services.AddSingleton<IAuthorRepository, AuthorRepository>();
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -21,9 +24,17 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateAuthorDtoValidator>();
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<MappingProfile>(); // Регистрируем конкретный профиль
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<LibraryContext>(options =>
+    options.UseSqlite(connectionString));
 
 var app = builder.Build();
 

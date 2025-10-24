@@ -1,50 +1,69 @@
 ﻿using Library.Application.Interfaces;
 using Library.Domain.Models;
 using Library.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Library.Infrastructure.Repositories
 {
     public class BookRepository : IBookRepository
     {
-        public Task<IEnumerable<Book>> GetAllAsync()
+        private readonly LibraryContext _context;
+        public BookRepository(LibraryContext context)
         {
-            return Task.FromResult<IEnumerable<Book>>(MemoryStorage.Books.ToList());
+            _context = context;
+        }
+        public async Task<IEnumerable<Book>> GetAllAsync(int pageNumber, int pageSize)
+        {
+            return await _context.Books
+                .AsNoTracking()
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
-        public Task<Book?> GetByIdAsync(int id)
+        public async Task<Book?> GetByIdAsync(int id)
         {
-            var book = MemoryStorage.Books.FirstOrDefault(x => x.Id == id);
-            return Task.FromResult(book);
+            return await _context.Books
+                .AsNoTracking()
+                .FirstOrDefaultAsync(b => b.Id == id);
         }
 
-        public Task<Book?> AddAsync(Book book)
+        public async Task<Book?> AddAsync(Book book)
         {
-            var MaxId = MemoryStorage.Books.Any() ? MemoryStorage.Books.Max(b => b.Id) : 0;
-            book.Id = MaxId + 1;
-            MemoryStorage.Books.Add(book);
-            return Task.FromResult(book);
+            _context.Books.Add(book);
+            await _context.SaveChangesAsync();
+            return book;
         }
 
-        public Task UpdateAsync(Book book)
+        public async Task UpdateAsync(Book book)
         {
-            var existingBook = MemoryStorage.Books.FirstOrDefault(b => b.Id == book.Id);
-            if (existingBook != null)
-            {
-                existingBook.Title = book.Title;
-                existingBook.PublishedYear = book.PublishedYear;
-                existingBook.AuthorId = book.AuthorId;
-            }
-            return Task.CompletedTask;
+            await _context.Books
+                .Where(b => b.Id == book.Id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(b => b.PublishedYear, book.PublishedYear)
+                    .SetProperty(b => b.AuthorId, book.AuthorId)
+                    .SetProperty(b => b.Title, book.Title)
+                );
         }
 
-        public Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
-            var bookToRemove = MemoryStorage.Books.FirstOrDefault(b => b.Id == id); 
-            if (bookToRemove != null)
-            {
-                MemoryStorage.Books.Remove(bookToRemove);
-            }
-            return Task.CompletedTask;
+            await _context.Books
+                .Where(b => b.Id == id)
+                .ExecuteDeleteAsync();
+        }
+
+        public async Task<IEnumerable<Book>> GetBooksPublishedAfterYearAsync(int year)
+        {
+            return await _context.Books
+                .Where(b => b.PublishedYear > year)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<bool> HasBooksAsync(int authorId)
+        {
+            return await _context.Books.AnyAsync(b => b.AuthorId == authorId);
         }
     }
 }

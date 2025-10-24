@@ -1,4 +1,5 @@
-﻿using Library.Application.Interfaces;
+﻿using Library.Application.DTOs;
+using Library.Application.Interfaces;
 using Library.Domain.Models;
 
 namespace Library.Application.Services
@@ -36,10 +37,11 @@ namespace Library.Application.Services
             await _bookRepository.DeleteAsync(id);
         }
 
-        public async Task<IEnumerable<Book>> GetAllBooksAsync()
+        public async Task<IEnumerable<Book>> GetAllBooksAsync(int pageNumber, int pageSize)
         {
-            return await _bookRepository.GetAllAsync();
+            return await _bookRepository.GetAllAsync(pageNumber, pageSize);
         }
+
 
         public async Task<Book?> GetBookByIdAsync(int id)
         {
@@ -61,6 +63,23 @@ namespace Library.Application.Services
             }
 
             await _bookRepository.UpdateAsync(updatedBook);
+        }
+
+        public async Task<IEnumerable<BookDto>> GetBooksPublishedAfterAsync(int year)
+        {
+            var books = await _bookRepository.GetBooksPublishedAfterYearAsync(year);
+            return books.Select(b => new BookDto
+            {
+                Id = b.Id,
+                AuthorId = b.AuthorId,
+                Title = b.Title,
+                PublishedYear = b.PublishedYear,
+            });
+        }
+
+        public async Task<bool> HasBooksAsync(int authorId)
+        {
+            return await _bookRepository.HasBooksAsync(authorId);
         }
     }
 }

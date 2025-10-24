@@ -1,4 +1,5 @@
-﻿using Library.Application.DTOs;
+﻿using AutoMapper;
+using Library.Application.DTOs;
 using Library.Application.Services;
 using Library.Domain.Models;
 using Microsoft.AspNetCore.Http;
@@ -12,17 +13,22 @@ namespace Library.API.Controllers
     public class BooksController : ControllerBase
     {
         private readonly IBookService _bookService;
+        private readonly IMapper _mapper;
 
-        public BooksController(IBookService bookService)
+        public BooksController(IBookService bookService, IMapper mapper)
         {
             _bookService = bookService;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BookDto>>> GetAllBooks()
+        public async Task<ActionResult<IEnumerable<BookDto>>> GetAllBooks(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
         {
-            var books = await _bookService.GetAllBooksAsync();
-            var booksDto = books.Select(b => new BookDto { Id = b.Id, Title = b.Title, PublishedYear = b.PublishedYear, AuthorId = b.AuthorId });
+            var books = await _bookService.GetAllBooksAsync(pageNumber, pageSize);
+
+            var booksDto = _mapper.Map<IEnumerable<BookDto>>(books);
             return Ok(booksDto);
         }
 
@@ -36,36 +42,24 @@ namespace Library.API.Controllers
                 return NotFound($"Книга с ID = {id} не найдена.");
             }
 
-            var bookDto = new BookDto { Id = book.Id, Title = book.Title, PublishedYear = book.PublishedYear, AuthorId = book.AuthorId };
+            var bookDto = _mapper.Map<BookDto>(book);
             return Ok(bookDto);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Book?>> CreateBook([FromBody] CreateBookDto bookDto)
+        public async Task<ActionResult<BookDto>> CreateBook([FromBody] CreateBookDto bookDto)
         {
-            var bookModel = new Book
-            {
-                Title = bookDto.Title?.Trim() ?? string.Empty,
-                PublishedYear = bookDto.PublishedYear,
-                AuthorId = bookDto.AuthorId,
-            };
-
+            var bookModel = _mapper.Map<Book>(bookDto);
             var createdBook = await _bookService.CreateBookAsync(bookModel);
-            var bookToReturn = new BookDto { Id = createdBook.Id, Title = createdBook.Title, PublishedYear = createdBook.PublishedYear, AuthorId = createdBook.AuthorId };
+            var bookToReturn = _mapper.Map<BookDto>(createdBook);
             return CreatedAtAction(nameof(GetBookById), new { id = bookToReturn.Id }, bookToReturn);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateBook(int id, [FromBody] UpdateBookDto bookDto)
         {
-            var bookModel = new Book
-            {
-                Id = id,
-                Title = bookDto.Title?.Trim() ?? string.Empty,
-                PublishedYear = bookDto.PublishedYear,
-                AuthorId = bookDto.AuthorId,
-            };
-
+            var bookModel = _mapper.Map<Book>(bookDto);
+            bookModel.Id = id;
             await _bookService.UpdateBookAsync(id, bookModel);
             return NoContent();
         }
@@ -75,6 +69,19 @@ namespace Library.API.Controllers
         {
             await _bookService.DeleteBookAsync(id);
             return NoContent();
+        }
+
+        [HttpGet("published-after/{year}")]
+        public async Task<ActionResult<IEnumerable<BookDto>>> GetBooksPublishedAfter(int year)
+        {
+            if (year < 0 || year > DateTime.UtcNow.Year)
+            {
+                return BadRequest($"Год должен быть в диапазоне от 0 до {DateTime.UtcNow.Year}.");
+            }
+
+            var books = await _bookService.GetBooksPublishedAfterAsync(year);
+            var booksDto = _mapper.Map<IEnumerable<BookDto>>(books);
+            return Ok(booksDto);
         }
     }
 }

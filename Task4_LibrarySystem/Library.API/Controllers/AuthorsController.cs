@@ -1,6 +1,8 @@
-﻿using Library.Application.DTOs;
+﻿using AutoMapper;
+using Library.Application.DTOs;
 using Library.Application.Services;
 using Library.Domain.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,17 +13,19 @@ namespace Library.API.Controllers
     public class AuthorsController : ControllerBase
     {
         private readonly IAuthorService _authorService;
+        private readonly IMapper _mapper;
 
-        public AuthorsController(IAuthorService authorService)
+        public AuthorsController(IAuthorService authorService, IMapper mapper)
         {
             _authorService = authorService;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAllAuthors()
+        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAllAuthors([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var authors = await _authorService.GetAllAuthorsAsync();
-            var authorsDto = authors.Select(a => new AuthorDto { Id = a.Id, Name = a.Name, DateOfBirth = a.DateOfBirth});
+            var authors = await _authorService.GetAllAuthorsAsync(pageNumber, pageSize);
+            var authorsDto = _mapper.Map<IEnumerable<AuthorDto>>(authors);
             return Ok(authorsDto);
         }
 
@@ -35,22 +39,18 @@ namespace Library.API.Controllers
                 return NotFound($"Автор с ID = {id} не найден.");
             }
 
-            var authorDto = new AuthorDto { Id = author.Id, Name = author.Name, DateOfBirth = author.DateOfBirth };
-            return Ok(author);
+            var authorDto = _mapper.Map<AuthorDto>(author);
+            return Ok(authorDto);
         }
 
         [HttpPost]
         public async Task<ActionResult<AuthorDto>> CreateAuthor([FromBody] CreateAuthorDto authorDto)
         {
-            var authorModel = new Author
-            {
-                Name = authorDto.Name?.Trim() ?? string.Empty,
-                DateOfBirth = authorDto.DateOfBirth.Value
-            };
+            var authorModel = _mapper.Map<Author>(authorDto);
 
             var createdAuthor = await _authorService.CreateAuthorAsync(authorModel);
 
-            var authorToReturn = new AuthorDto { Id = createdAuthor.Id, Name = createdAuthor.Name, DateOfBirth = createdAuthor.DateOfBirth };
+            var authorToReturn = _mapper.Map<AuthorDto>(createdAuthor); 
 
             return CreatedAtAction("GetAuthorById", new { id = authorToReturn.Id }, authorToReturn);
         }
@@ -58,13 +58,9 @@ namespace Library.API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateAuthor(int id, [FromBody] UpdateAuthorDto authorDto)
         {
-            var authorModel = new Author
-            {
-                Id = id,
-                Name = authorDto.Name?.Trim() ?? string.Empty,
-                DateOfBirth = authorDto.DateOfBirth.Value
-            };
+            var authorModel = _mapper.Map<Author>(authorDto);
 
+            authorModel.Id = id;
 
             await _authorService.UpdateAuthorAsync(id, authorModel);
             return NoContent();
@@ -76,6 +72,29 @@ namespace Library.API.Controllers
         {
             await _authorService.DeleteAuthorAsync(id);
             return NoContent();
+        }
+
+        [HttpGet("with-book-count")]
+        public async Task<ActionResult<IEnumerable<AuthorWithBooksDto>>> GetAuthorsWithBookCount(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var authors = await _authorService.GetAllAuthorsWithBookCountAsync(pageNumber, pageSize);
+
+            var authorsDto = _mapper.Map<IEnumerable<AuthorWithBooksDto>>(authors);
+            return Ok(authorsDto);
+        }
+
+        [HttpGet("search/{nameQuery}")]
+        public async Task<ActionResult<IEnumerable<AuthorDto>>> FindAuthorByName(string nameQuery)
+        {
+            if (string.IsNullOrWhiteSpace(nameQuery))
+            {
+                return BadRequest("Поисковый запрос не может быть пустым.");
+            }
+            var authors = await _authorService.FindAuthorsByNameAsync(nameQuery);
+            var authorsDto = _mapper.Map<IEnumerable<AuthorDto>>(authors);
+            return Ok(authorsDto);
         }
     }
 }
