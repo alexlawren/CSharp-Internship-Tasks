@@ -38,9 +38,9 @@ namespace Library.Application.Services
             await _bookRepository.DeleteAsync(id);
         }
 
-        public async Task<PagedList<Book>> GetAllBooksAsync(int pageNumber, int pageSize)
+        public async Task<PagedList<Book>> GetAllBooksAsync(int pageNumber, int pageSize, int? publishedYear)
         {
-            return await _bookRepository.GetAllAsync(pageNumber, pageSize);
+            return await _bookRepository.GetAllAsync(pageNumber, pageSize, publishedYear);
         }
 
 

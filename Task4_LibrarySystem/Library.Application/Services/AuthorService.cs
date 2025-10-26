@@ -16,9 +16,9 @@ namespace Library.Application.Services
             _bookService = bookService;
         }
 
-        public async Task<PagedList<Author>> GetAllAuthorsAsync(int pageNumber, int pageSize)
+        public async Task<PagedList<Author>> GetAllAuthorsAsync(int pageNumber, int pageSize, int? bornAfter, int? bornBefore)
         {
-            return await _authorRepository.GetAllAsync(pageNumber, pageSize);
+            return await _authorRepository.GetAllAsync(pageNumber, pageSize, bornAfter, bornBefore);
         }
 
         public async Task<Author> GetAuthorByIdAsync(int id)
@@ -57,9 +57,9 @@ namespace Library.Application.Services
             await _authorRepository.DeleteAsync(id);
         }
 
-        public async Task<PagedList<Author>> GetAllAuthorsWithBookCountAsync(int pageNumber, int pageSize)
+        public async Task<PagedList<Author>> GetAllAuthorsWithBookCountAsync(int pageNumber, int pageSize, int? minBooks, int? maxBooks)
         {
-            return await _authorRepository.GetAllWithBookCountAsync(pageNumber, pageSize);
+            return await _authorRepository.GetAllWithBookCountAsync(pageNumber, pageSize, minBooks, maxBooks);
         }
 
         public async Task<IEnumerable<AuthorDto>> FindAuthorsByNameAsync(string nameQuery)

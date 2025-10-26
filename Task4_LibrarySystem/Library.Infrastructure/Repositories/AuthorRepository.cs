@@ -14,11 +14,21 @@ namespace Library.Infrastructure.Repositories
         {
             _context = context;
         }
-        public async Task<PagedList<Author>> GetAllAsync(int pageNumber, int pageSize)
+        public async Task<PagedList<Author>> GetAllAsync(int pageNumber, int pageSize, int? bornAfter, int? bornBefore)
         {
-            var query = _context.Authors
-                .AsNoTracking()
-                .OrderBy(a => a.Name);
+            var query = _context.Authors.AsNoTracking();
+
+            if (bornAfter.HasValue)
+            {
+                query = query.Where(a => a.DateOfBirth.Year > bornAfter.Value);
+            }
+
+            if (bornBefore.HasValue)
+            {
+                query = query.Where(a => a.DateOfBirth.Year < bornBefore.Value);
+            }
+
+            query = query.OrderBy(a => a.Name);
 
             return await PagedList<Author>.CreateAsync(query, pageNumber, pageSize);
         }
@@ -54,13 +64,22 @@ namespace Library.Infrastructure.Repositories
                 .ExecuteDeleteAsync();
         }
 
-        public async Task<PagedList<Author>> GetAllWithBookCountAsync(int pageNumber, int pageSize)
+        public async Task<PagedList<Author>> GetAllWithBookCountAsync(int pageNumber, int pageSize, int? minBooks, int? maxBooks)
         {
             var query = _context.Authors
                 .Include(a => a.Books)
-                .AsNoTracking()
-                .OrderBy(a => a.Name);
+                .AsNoTracking();
 
+            if(minBooks.HasValue)
+            {
+                query = query.Where(a => a.Books.Count >= minBooks.Value);
+            }
+
+            if(maxBooks.HasValue)
+            {
+                query = query.Where(a => a.Books.Count <= maxBooks.Value);
+            }
+            query = query.OrderBy(a => a.Name);
             return await PagedList<Author>.CreateAsync(query, pageNumber, pageSize);
         }
 

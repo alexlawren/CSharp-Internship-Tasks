@@ -25,9 +25,10 @@ namespace Library.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetAllBooks(
         [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] int? publishedYear = null)
         {
-            var pagedBooks = await _bookService.GetAllBooksAsync(pageNumber, pageSize);
+            var pagedBooks = await _bookService.GetAllBooksAsync(pageNumber, pageSize, publishedYear);
             var paginationMetadata = new
             {
                 totalCount = pagedBooks.TotalCount,
@@ -38,7 +39,7 @@ namespace Library.API.Controllers
                 hasNext = pagedBooks.HasNext
             };
 
-            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+            Response.Headers["X-Pagination"] = JsonSerializer.Serialize(paginationMetadata);
             var booksDto = _mapper.Map<IEnumerable<BookDto>>(pagedBooks);
             return Ok(booksDto);
         }

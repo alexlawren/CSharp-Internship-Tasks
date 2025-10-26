@@ -13,11 +13,16 @@ namespace Library.Infrastructure.Repositories
         {
             _context = context;
         }
-        public async Task<PagedList<Book>> GetAllAsync(int pageNumber, int pageSize)
+        public async Task<PagedList<Book>> GetAllAsync(int pageNumber, int pageSize, int? publishedYear)
         {
-            var query = _context.Books
-                    .AsNoTracking()
-                    .OrderBy(b => b.Title);
+            var query = _context.Books.AsNoTracking();
+
+            if (publishedYear.HasValue)
+            {
+                query = query.Where(b => b.PublishedYear == publishedYear.Value);
+            }
+
+            query = query.OrderBy(b => b.Title);
             return await PagedList<Book>.CreateAsync(query, pageNumber, pageSize);
         }
 

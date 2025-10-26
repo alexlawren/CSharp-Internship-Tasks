@@ -23,9 +23,13 @@ namespace Library.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAllAuthors([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAllAuthors(
+            [FromQuery] int pageNumber = 1, 
+            [FromQuery] int pageSize = 10,
+            [FromQuery] int? bornAfter = null, 
+            [FromQuery] int? bornBefore = null) 
         {
-            var pagedAuthors = await _authorService.GetAllAuthorsAsync(pageNumber, pageSize);
+            var pagedAuthors = await _authorService.GetAllAuthorsAsync(pageNumber, pageSize, bornAfter, bornBefore);
             var paginationMetadata = new
             {
                 pagedAuthors.TotalCount,
@@ -89,9 +93,12 @@ namespace Library.API.Controllers
         [HttpGet("with-book-count")]
         public async Task<ActionResult<IEnumerable<AuthorWithBooksDto>>> GetAuthorsWithBookCount(
             [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
+            [FromQuery] int pageSize = 10,
+            [FromQuery] int? minBooks = null, 
+            [FromQuery] int? maxBooks = null) 
+
         {
-            var pagedAuthors = await _authorService.GetAllAuthorsWithBookCountAsync(pageNumber, pageSize);
+            var pagedAuthors = await _authorService.GetAllAuthorsWithBookCountAsync(pageNumber, pageSize, minBooks, maxBooks);
 
             var paginationMetadata = new
             {

@@ -5,7 +5,7 @@ namespace Library.Application.Interfaces
 {
     public interface IBookRepository
     {
-        Task<PagedList<Book>> GetAllAsync(int pageNumber, int pageSize);
+        Task<PagedList<Book>> GetAllAsync(int pageNumber, int pageSize, int? publishedYear);
         Task<Book?> GetByIdAsync(int id);
         Task<Book?> AddAsync(Book book);
         Task UpdateAsync(Book book);
