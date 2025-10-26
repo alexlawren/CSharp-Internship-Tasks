@@ -1,4 +1,5 @@
-﻿using Library.Application.DTOs;
+﻿using Library.Application.Common;
+using Library.Application.DTOs;
 using Library.Application.Interfaces;
 using Library.Domain.Models;
 
@@ -15,7 +16,7 @@ namespace Library.Application.Services
             _bookService = bookService;
         }
 
-        public async Task<IEnumerable<Author>> GetAllAuthorsAsync(int pageNumber, int pageSize)
+        public async Task<PagedList<Author>> GetAllAuthorsAsync(int pageNumber, int pageSize)
         {
             return await _authorRepository.GetAllAsync(pageNumber, pageSize);
         }
@@ -56,7 +57,7 @@ namespace Library.Application.Services
             await _authorRepository.DeleteAsync(id);
         }
 
-        public async Task<IEnumerable<Author>> GetAllAuthorsWithBookCountAsync(int pageNumber, int pageSize)
+        public async Task<PagedList<Author>> GetAllAuthorsWithBookCountAsync(int pageNumber, int pageSize)
         {
             return await _authorRepository.GetAllWithBookCountAsync(pageNumber, pageSize);
         }

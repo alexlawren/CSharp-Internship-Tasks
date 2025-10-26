@@ -1,11 +1,12 @@
-﻿using Library.Application.DTOs;
+﻿using Library.Application.Common;
+using Library.Application.DTOs;
 using Library.Domain.Models;
 
 namespace Library.Application.Services
 {
     public interface IBookService
     {
-        Task<IEnumerable<Book>> GetAllBooksAsync(int pageNumber, int pageSize);
+        Task<PagedList<Book>> GetAllBooksAsync(int pageNumber, int pageSize);
         Task<Book?> GetBookByIdAsync(int id);
         Task<Book> CreateBookAsync(Book newBook);
         Task UpdateBookAsync(int id, Book updatedBook);

@@ -1,4 +1,5 @@
-﻿using Library.Application.DTOs;
+﻿using Library.Application.Common;
+using Library.Application.DTOs;
 using Library.Application.Interfaces;
 using Library.Domain.Models;
 
@@ -37,7 +38,7 @@ namespace Library.Application.Services
             await _bookRepository.DeleteAsync(id);
         }
 
-        public async Task<IEnumerable<Book>> GetAllBooksAsync(int pageNumber, int pageSize)
+        public async Task<PagedList<Book>> GetAllBooksAsync(int pageNumber, int pageSize)
         {
             return await _bookRepository.GetAllAsync(pageNumber, pageSize);
         }

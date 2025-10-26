@@ -1,4 +1,5 @@
-﻿using Library.Application.Interfaces;
+﻿using Library.Application.Common;
+using Library.Application.Interfaces;
 using Library.Domain.Models;
 using Library.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -13,13 +14,13 @@ namespace Library.Infrastructure.Repositories
         {
             _context = context;
         }
-        public async Task<IEnumerable<Author>> GetAllAsync(int pageNumber, int pageSize)
+        public async Task<PagedList<Author>> GetAllAsync(int pageNumber, int pageSize)
         {
-            return await _context.Authors
+            var query = _context.Authors
                 .AsNoTracking()
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+                .OrderBy(a => a.Name);
+
+            return await PagedList<Author>.CreateAsync(query, pageNumber, pageSize);
         }
 
         public async Task<Author?> GetByIdAsync(int id)
@@ -53,14 +54,14 @@ namespace Library.Infrastructure.Repositories
                 .ExecuteDeleteAsync();
         }
 
-        public async Task<IEnumerable<Author>> GetAllWithBookCountAsync(int pageNumber, int pageSize)
+        public async Task<PagedList<Author>> GetAllWithBookCountAsync(int pageNumber, int pageSize)
         {
-            return await _context.Authors
+            var query = _context.Authors
                 .Include(a => a.Books)
                 .AsNoTracking()
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+                .OrderBy(a => a.Name);
+
+            return await PagedList<Author>.CreateAsync(query, pageNumber, pageSize);
         }
 
         public async Task<IEnumerable<Author>> FindAuthorsByNameAsync(string nameQuery)

@@ -1,4 +1,5 @@
-﻿using Library.Application.Interfaces;
+﻿using Library.Application.Common;
+using Library.Application.Interfaces;
 using Library.Domain.Models;
 using Library.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -12,13 +13,12 @@ namespace Library.Infrastructure.Repositories
         {
             _context = context;
         }
-        public async Task<IEnumerable<Book>> GetAllAsync(int pageNumber, int pageSize)
+        public async Task<PagedList<Book>> GetAllAsync(int pageNumber, int pageSize)
         {
-            return await _context.Books
-                .AsNoTracking()
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var query = _context.Books
+                    .AsNoTracking()
+                    .OrderBy(b => b.Title);
+            return await PagedList<Book>.CreateAsync(query, pageNumber, pageSize);
         }
 
         public async Task<Book?> GetByIdAsync(int id)

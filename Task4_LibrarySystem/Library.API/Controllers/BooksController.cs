@@ -5,6 +5,7 @@ using Library.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
+using System.Text.Json;
 
 namespace Library.API.Controllers
 {
@@ -26,9 +27,19 @@ namespace Library.API.Controllers
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10)
         {
-            var books = await _bookService.GetAllBooksAsync(pageNumber, pageSize);
+            var pagedBooks = await _bookService.GetAllBooksAsync(pageNumber, pageSize);
+            var paginationMetadata = new
+            {
+                totalCount = pagedBooks.TotalCount,
+                pageSize = pagedBooks.PageSize,
+                currentPage = pagedBooks.CurrentPage,
+                totalPages = pagedBooks.TotalPages,
+                hasPrevious = pagedBooks.HasPrevious,
+                hasNext = pagedBooks.HasNext
+            };
 
-            var booksDto = _mapper.Map<IEnumerable<BookDto>>(books);
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+            var booksDto = _mapper.Map<IEnumerable<BookDto>>(pagedBooks);
             return Ok(booksDto);
         }
 

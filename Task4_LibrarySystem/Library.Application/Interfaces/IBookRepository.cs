@@ -1,10 +1,11 @@
-﻿using Library.Domain.Models;
+﻿using Library.Application.Common;
+using Library.Domain.Models;
 
 namespace Library.Application.Interfaces
 {
     public interface IBookRepository
     {
-        Task<IEnumerable<Book>> GetAllAsync(int pageNumber, int pageSize);
+        Task<PagedList<Book>> GetAllAsync(int pageNumber, int pageSize);
         Task<Book?> GetByIdAsync(int id);
         Task<Book?> AddAsync(Book book);
         Task UpdateAsync(Book book);

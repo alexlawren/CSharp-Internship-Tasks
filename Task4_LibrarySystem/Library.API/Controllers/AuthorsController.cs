@@ -5,6 +5,7 @@ using Library.Domain.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace Library.API.Controllers
 {
@@ -24,8 +25,19 @@ namespace Library.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAllAuthors([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var authors = await _authorService.GetAllAuthorsAsync(pageNumber, pageSize);
-            var authorsDto = _mapper.Map<IEnumerable<AuthorDto>>(authors);
+            var pagedAuthors = await _authorService.GetAllAuthorsAsync(pageNumber, pageSize);
+            var paginationMetadata = new
+            {
+                pagedAuthors.TotalCount,
+                pagedAuthors.PageSize,
+                pagedAuthors.CurrentPage,
+                pagedAuthors.TotalPages,
+                pagedAuthors.HasPrevious,
+                pagedAuthors.HasNext
+            };
+
+            Response.Headers["X-Pagination"] = JsonSerializer.Serialize(paginationMetadata);
+            var authorsDto = _mapper.Map<IEnumerable<AuthorDto>>(pagedAuthors);
             return Ok(authorsDto);
         }
 
@@ -79,9 +91,20 @@ namespace Library.API.Controllers
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
-            var authors = await _authorService.GetAllAuthorsWithBookCountAsync(pageNumber, pageSize);
+            var pagedAuthors = await _authorService.GetAllAuthorsWithBookCountAsync(pageNumber, pageSize);
 
-            var authorsDto = _mapper.Map<IEnumerable<AuthorWithBooksDto>>(authors);
+            var paginationMetadata = new
+            {
+                pagedAuthors.TotalCount,
+                pagedAuthors.PageSize,
+                pagedAuthors.CurrentPage,
+                pagedAuthors.TotalPages,
+                pagedAuthors.HasPrevious,
+                pagedAuthors.HasNext
+            };
+            Response.Headers["X-Pagination"] = JsonSerializer.Serialize(paginationMetadata);
+
+            var authorsDto = _mapper.Map<IEnumerable<AuthorWithBooksDto>>(pagedAuthors);
             return Ok(authorsDto);
         }
 
